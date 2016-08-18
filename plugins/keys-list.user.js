@@ -40,7 +40,7 @@ function wrapper(plugin_info) {
 
   cache.getPortalByGuid = function (guid) {
     var portal_cache = cache.cache[guid];
-    console.log('==KeysList gpbg ' + typeof portal_cache.ent + cache.cache.length);
+    console.log('==KeysList gpbg ' + typeof portal_cache.ent);
     if (portal_cache && portal_cache.ent) {
       return JSON.parse(portal_cache.ent);
     }
@@ -48,7 +48,7 @@ function wrapper(plugin_info) {
 
   cache.storeToLocal = function () {
     localStorage.setItem(cache.KEY_LOCALSTRAGE, JSON.stringify(cache.cache));
-    console.log('plugin-cache-local: storeToLocal ' + cache.cache.length);
+    console.log('plugin-cache-local: storeToLocal ');
   };
 
   cache.loadFromLocal = function () {
@@ -56,7 +56,7 @@ function wrapper(plugin_info) {
     var raw = window.localStorage[cache.KEY_LOCALSTRAGE];
     if (raw) {
       cache.merge(JSON.parse(raw));
-      console.log('plugin-cache-local: loadFromLocal ' + cache.cache.length);
+      console.log('plugin-cache-local: loadFromLocal ');
     } else {
       // make a new cache
       window.localStorage[cache.KEY_LOCALSTRAGE] = "{}";
@@ -71,12 +71,12 @@ function wrapper(plugin_info) {
     //}
 
     $.each(inbound, function (guid, data) {
-      console.log(data.ent);
-      if (!cache.cache.hasOwnProperty(guid)) {
+      console.log('==KeysList merge ' + Object.keys(data.ent).join(' '));
+      if (data.ent && !cache.cache.hasOwnProperty(guid)) {
         cache.cache[guid] = data;
       }
     });
-    return cache.cache.length;
+    return Object.keys(cache.cache).length;
   };
 
   // Expand Cache END //////////////////////////////////////////////////////////
