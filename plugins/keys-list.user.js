@@ -40,15 +40,25 @@ function wrapper(plugin_info) {
 
   cache.getPortalByGuid = function (guid) {
     var portal_cache = cache.cache[guid];
-    console.log('==KeysList gpbg ' + typeof portal_cache.ent);
     if (portal_cache && portal_cache.ent) {
-      return JSON.parse(portal_cache.ent);
+      console.log('==KeysList gpbg ' + Object.keys(portal_cache).join(' '));
+      return window.decodeArray.portalSummary(portal_cache.ent[2]);
     }
   };
 
   cache.storeToLocal = function () {
-    localStorage.setItem(cache.KEY_LOCALSTRAGE, JSON.stringify(cache.cache));
-    console.log('plugin-cache-local: storeToLocal ');
+    var lc = cache.cache;
+    if (Object.keys(lc).length) {
+      $.each(lc, function(guid, data) {
+        if (data.ent) console.log(data.ent);
+        if ((typeof data.ent === 'Array') && (data.ent.length === 3)) {
+          data.ent = data.ent[2];
+        }
+      });
+      localStorage.setItem(cache.KEY_LOCALSTRAGE, JSON.stringify(lc));
+    }
+
+    console.log('plugin-cache-local: storeToLocal ' + Object.keys(lc).length);
   };
 
   cache.loadFromLocal = function () {
@@ -56,7 +66,7 @@ function wrapper(plugin_info) {
     var raw = window.localStorage[cache.KEY_LOCALSTRAGE];
     if (raw) {
       cache.merge(JSON.parse(raw));
-      console.log('plugin-cache-local: loadFromLocal ');
+      console.log('plugin-cache-local: loadFromLocal ' + Object.keys(cache.cache).length);
     } else {
       // make a new cache
       window.localStorage[cache.KEY_LOCALSTRAGE] = "{}";
@@ -73,7 +83,7 @@ function wrapper(plugin_info) {
     $.each(inbound, function (guid, data) {
       console.log('==KeysList merge ' + Object.keys(data.ent).join(' '));
       if (data.ent && !cache.cache.hasOwnProperty(guid)) {
-        cache.cache[guid] = data;
+        cache.cache[guid] = data.ent;
       }
     });
     return Object.keys(cache.cache).length;
@@ -88,30 +98,32 @@ function wrapper(plugin_info) {
   self.DEFAULT_ZOOM_LEVEL = '17';
   self.listAll = [];
 
-  // fetch a portal name from a cached list if available
+  // fetch a portal info from a cached list if available
   self.getPortalDetails = function getPortalDetails(key) {
-    var name = "(not detected)";
+    var title = "(not detected)";
     var latLng = '0,0';
     var imageUrl = '';
 
     // try plugin cache
     var portal_cache = cache.getPortalByGuid(key.guid);
-    if (typeof portal_cache !== 'undefined') {
-      //name = portal_cache.name;
+    if (portal_cache) {
+      title = portal_cache.title;
+      imageUrl = window.fixPortalImageUrl(portal_cache.image);
       console.log('==KsysList pc ' + portal_cache + Object.keys(portal_cache).join(' '));
     }
 
     var data = (window.portals[key.guid] && window.portals[key.guid].options.data) || window.portalDetail.get(key.guid) || null;
     if (data) {
       console.log('==KsysList pd ' + data.title);
-      if (data.title) name = data.title;
+      if (data.title) title = data.title;
       imageUrl = window.fixPortalImageUrl(data.image);
-      if (imageUrl.indexOf('//') === 0) {
-        imageUrl = 'http:' + imageUrl;
-      }
-      if (imageUrl.indexOf(DEFAULT_PORTAL_IMG) !== -1) {
-        imageUrl = '';
-      }
+    }
+
+    if (imageUrl.indexOf('//') === 0) {
+      imageUrl = 'http:' + imageUrl;
+    }
+    if (imageUrl.indexOf(DEFAULT_PORTAL_IMG) !== -1) {
+      imageUrl = '';
     }
 
     var hLatLng = window.findPortalLatLng(key.guid);
@@ -119,7 +131,7 @@ function wrapper(plugin_info) {
       latLng = hLatLng.lat + ',' + hLatLng.lng;
     }
 
-    key.name = name;
+    key.title = title;
     key.latLng = latLng;
     key.imageUrl = imageUrl;
     if (latLng === '0,0') {
@@ -143,7 +155,7 @@ function wrapper(plugin_info) {
     if (key.count > 0) {
       key = self.getPortalDetails(key);
       var csvline = [
-        self.csvValue(key.name),
+        self.csvValue(key.title),
         parseInt(key.count, 10),
         self.csvValue(key.latLng),
         self.csvValue(key.intelMapUrl),
@@ -162,7 +174,7 @@ function wrapper(plugin_info) {
     });
 
     var html = '<p>KeysList for ' + window.PLAYER.nickname + ' ' + self.listAll.length + 'portals of keys. ' + new Date().toISOString() +
-        '</p><textarea cols="78" rows="20">name,count,latlng,url,image,guid' + "\n" + self.listAll.join("\n") + '</textarea>';
+        '</p><textarea cols="78" rows="20">name,count,latlng,intelmap,image,guid' + "\n" + self.listAll.join("\n") + '</textarea>';
     dialog({
       title: 'KeysList',
       html: html,
@@ -170,6 +182,8 @@ function wrapper(plugin_info) {
       position: {my: 'right center', at: 'center-60 center', of: window, collision: 'fit'}
     });
     // console.log("==KeysList " + window.PLAYER.nickname + " " + self.listAll.length + " " + new Date().toISOString());
+
+    cache.storeToLocal();// for debug
   };
 
 
