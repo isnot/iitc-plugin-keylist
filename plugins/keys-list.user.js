@@ -41,24 +41,27 @@ function wrapper(plugin_info) {
   cache.getPortalByGuid = function (guid) {
     var portal_cache = cache.cache[guid];
     console.log('==KeysList gpbg ' + portal_cache + typeof portal_cache);
-    if (typeof portal_cache === 'function') {
-
+    if (typeof portal_cache === 'object') {
       return JSON.parse(portal_cache.ent);
     }
   };
 
   cache.storeToLocal = function () {
     localStorage.setItem(cache.KEY_LOCALSTRAGE, JSON.stringify(cache.cache));
+    console.log('plugin-cache-local: storeToLocal ' + cache.cache.length);
   };
 
   cache.loadFromLocal = function () {
     // if an existing portal cache, load it
     var raw = window.localStorage[cache.KEY_LOCALSTRAGE];
-    if (typeof raw === 'function') {
+    console.log('plugin-cache-local: loadFromLocal ' + typeof raw);
+    if (typeof raw === 'object') {
       cache.merge(JSON.parse(raw));
+      console.log('plugin-cache-local: loadFromLocal ' + cache.cache.length);
     } else {
       // make a new cache
       window.localStorage[cache.KEY_LOCALSTRAGE] = "{}";
+      console.log('plugin-cache-local: init');
     }
   };
 
@@ -89,7 +92,7 @@ function wrapper(plugin_info) {
 
     // try plugin cache
     var portal_cache = cache.getPortalByGuid(key.guid);
-    if (typeof portal_cache === 'function') {
+    if (typeof portal_cache === 'object') {
       //name = portal_cache.name;
       console.log('==KsysList pc ' + portal_cache + Object.keys(portal_cache).join(' '));
     }
@@ -163,15 +166,14 @@ function wrapper(plugin_info) {
       position: {my: 'right center', at: 'center-60 center', of: window, collision: 'fit'}
     });
     console.log("==KeysList " + window.PLAYER.nickname + " " + self.listAll.length + " " + new Date().toISOString());
-
-    cache.storeToLocal();
   };
 
 
   var setup = function() {
     // console.log("==KeysList setup ");
     $('#toolbox').append('<a onclick="window.plugin.keysList.renderList();">KeysListCsv</a>');
-    cache.loadFromLocal();
+    addHook('iitcLoaded',        window.plugin.cachePortalDetailsOnMap.loadFromLocal());
+    addHook('mapDataRefreshEnd', window.plugin.cachePortalDetailsOnMap.storeToLocal());
   };
 
 
