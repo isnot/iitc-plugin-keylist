@@ -40,8 +40,8 @@ function wrapper(plugin_info) {
 
   cache.getPortalByGuid = function (guid) {
     var portal_cache = cache.cache[guid];
-    console.log('==KeysList gpbg ' + portal_cache + cache.cache.length);
-    if (typeof portal_cache !== 'undefined') {
+    console.log('==KeysList gpbg ' + typeof portal_cache.ent + cache.cache.length);
+    if (portal_cache && portal_cache.ent) {
       return JSON.parse(portal_cache.ent);
     }
   };
@@ -54,8 +54,7 @@ function wrapper(plugin_info) {
   cache.loadFromLocal = function () {
     // if an existing portal cache, load it
     var raw = window.localStorage[cache.KEY_LOCALSTRAGE];
-    console.log('plugin-cache-local: loadFromLocal ' + typeof raw);
-    if (typeof raw !== 'undefined') {
+    if (raw) {
       cache.merge(JSON.parse(raw));
       console.log('plugin-cache-local: loadFromLocal ' + cache.cache.length);
     } else {
@@ -66,16 +65,17 @@ function wrapper(plugin_info) {
   };
 
   cache.merge = function (inbound) {
-    if (cache.cache.length < 1) {
-      cache.cache = inbound;
-      return inbound.length;
-    }
+    //if (cache.cache.length < 1) {
+    //  cache.cache = inbound;
+    //  return inbound.length;
+    //}
 
-    for (var x in Object.keys(inbound)) {
-      if (!cache.cache.hasOwnProperty(x)) {
-        cache.cache[x] = inbound[x];
+    $.each(inbound, function (guid, data) {
+      console.log(data.ent);
+      if (!cache.cache.hasOwnProperty(guid)) {
+        cache.cache[guid] = data;
       }
-    }
+    });
     return cache.cache.length;
   };
 
