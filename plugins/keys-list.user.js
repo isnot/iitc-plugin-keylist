@@ -40,9 +40,15 @@ function wrapper(plugin_info) {
 
   cache.getPortalByGuid = function (guid) {
     var portal_cache = cache.cache[guid];
+
+    // what is this?
+    if (portal_cache && (portal_cache.length === 3)) {
+      portal_cache.ent = delete portal_cache[2];
+    }
+
     if (portal_cache && portal_cache.ent) {
       console.log('==KeysList gpbg ' + Object.keys(portal_cache).join(' '));
-      return window.decodeArray.portalSummary(portal_cache.ent[2]);
+      return window.decodeArray.portalSummary(portal_cache.ent);
     }
   };
 
@@ -51,9 +57,15 @@ function wrapper(plugin_info) {
     if (Object.keys(lc).length) {
       $.each(lc, function(guid, data) {
         if (data.ent) console.log(data.ent);
+        // I dont know what I do...
         if ((typeof data.ent === 'object') && (data.ent.length === 3)) {
           data.ent = data.ent[2];
+          data.loadtime = data.ent[1];
+          delete data.ent[0];
+          delete data.ent[1];
+          delete data.ent[2];
         }
+        lc[guid] = data;
       });
       localStorage.setItem(cache.KEY_LOCALSTRAGE, JSON.stringify(lc));
     }
