@@ -2,7 +2,7 @@
 // @id             iitc-plugin-keys-list@isnot
 // @name           IITC plugin: Keys List
 // @category       Keys
-// @version        0.3.20160818
+// @version        0.4.20160819
 // @namespace      https://github.com/jonatkins/ingress-intel-total-conversion
 // @author         isnot
 // @updateURL      none
