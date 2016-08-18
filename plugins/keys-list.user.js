@@ -54,11 +54,23 @@ function wrapper(plugin_info) {
     // if an existing portal cache, load it
     var raw = window.localStorage[cache.KEY_LOCALSTRAGE];
     if (typeof raw === 'function') {
-      //cache.cache = JSON.parse(window.localStorage[cache.KEY_LOCALSTRAGE]);
+      cache.merge(JSON.parse(raw));
     } else {
       // make a new cache
       window.localStorage[cache.KEY_LOCALSTRAGE] = "{}";
     }
+  };
+
+  cache.merge = function (inbound) {
+    if (cache.cache.length < 1) {
+      cache.cache = inbound;
+      return inbound.length;
+    }
+
+    for (var x in Object.keys(inbound)) {
+      cache.cache{x} = inbound{x};
+    }
+    return cache.cache.length;
   };
 
   // Expand Cache END //////////////////////////////////////////////////////////
@@ -71,7 +83,8 @@ function wrapper(plugin_info) {
   // fetch a portal name from a cached list if available
   self.getPortalDetails = function getPortalDetails(key) {
     var name = "(not detected)";
-    var latLng = '"0,0"';
+    var latLng = '0,0';
+    var imageUrl = '';
 
     // try plugin cache
     var portal_cache = cache.getPortalByGuid(key.guid);
@@ -82,29 +95,47 @@ function wrapper(plugin_info) {
 
     var portal = window.portals[key.guid];
     if (portal) {
-      name = portal.options.data.title;
-      console.log('==KeysList po ' + Object.keys(portal).join(' '));
+      name     = portal.options.data.title;
+      imageUrl = portal.options.data.imageUrl;
     }
 
     var hLatLng = window.findPortalLatLng(key.guid);
     if (hLatLng) {
-      latLng = '"' + hLatLng.lat + ',' + hLatLng.lng + '"';
+      latLng = hLatLng.lat + ',' + hLatLng.lng;
+
     }
 
     key.name = name;
     key.latLng = latLng;
-    key.imageUrl = '';
-    key.intelMapUrl = '';
+    key.imageUrl = imageUrl;
+    if (latLng === '0,0') {
+      key.intelMapUrl = '';
+    } else {
+      key.intelMapUrl = 'https://www.ingress.com/intel?ll=' + latLng + '&z=17&pll=' + latLng;
+    }
 
     return key;
+  };
+
+  self.csvValue = function(str) {
+    if (str) {
+      return '"' + str.replace("/\"/g", '""') + '"';
+    } else {
+      return '';
+    }
   };
 
   self.eachKey = function(key) {
     if (key.count > 0) {
       key = self.getPortalDetails(key);
-      var keyNameCsvValue = key.name;
-      keyNameCsvValue = '"' + keyNameCsvValue.replace("/\"/g", '""') + '"';
-      var csvline = [keyNameCsvValue, key.count, key.latLng, key.intelMapUrl, key.imageUrl, key.guid];
+      var csvline = [
+        self.csvValue(key.name),
+        parseInt(key.count, 10),
+        self.csvValue(key.latLng),
+        self.csvValue(key.intelMapUrl),
+        self.csvValue(key.imageUrl),
+        key.guid
+      ];
       self.listAll.push(csvline.join(","));
     }
   };
@@ -125,12 +156,15 @@ function wrapper(plugin_info) {
       position: {my: 'right center', at: 'center-60 center', of: window, collision: 'fit'}
     });
     console.log("==KeysList " + window.PLAYER.nickname + " " + self.listAll.length + " " + new Date().toISOString());
+
+    cache.storeToLocal();
   };
 
 
   var setup = function() {
     // console.log("==KeysList setup ");
     $('#toolbox').append('<a onclick="window.plugin.keysList.renderList();">KeysListCsv</a>');
+    cache.loadFromLocal();
   };
 
 
