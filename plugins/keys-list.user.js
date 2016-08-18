@@ -84,6 +84,8 @@ function wrapper(plugin_info) {
   // use own namespace for plugin
   window.plugin.keysList = function() {};
   var self = window.plugin.keysList;
+  self.INTEL_URL = 'https://www.ingress.com/intel';
+  self.DEFAULT_ZOOM_LEVEL = '17';
   self.listAll = [];
 
   // fetch a portal name from a cached list if available
@@ -94,7 +96,7 @@ function wrapper(plugin_info) {
 
     // try plugin cache
     var portal_cache = cache.getPortalByGuid(key.guid);
-    if (typeof portal_cache === 'object') {
+    if (typeof portal_cache !== 'undefined') {
       //name = portal_cache.name;
       console.log('==KsysList pc ' + portal_cache + Object.keys(portal_cache).join(' '));
     }
@@ -123,7 +125,7 @@ function wrapper(plugin_info) {
     if (latLng === '0,0') {
       key.intelMapUrl = '';
     } else {
-      key.intelMapUrl = 'https://www.ingress.com/intel?ll=' + latLng + '&z=17&pll=' + latLng;
+      key.intelMapUrl = self.INTEL_URL + '?ll=' + latLng + '&z=' + self.DEFAULT_ZOOM_LEVEL + '&pll=' + latLng;
     }
 
     return key;
@@ -167,7 +169,7 @@ function wrapper(plugin_info) {
       width: 600,
       position: {my: 'right center', at: 'center-60 center', of: window, collision: 'fit'}
     });
-    console.log("==KeysList " + window.PLAYER.nickname + " " + self.listAll.length + " " + new Date().toISOString());
+    // console.log("==KeysList " + window.PLAYER.nickname + " " + self.listAll.length + " " + new Date().toISOString());
   };
 
 
