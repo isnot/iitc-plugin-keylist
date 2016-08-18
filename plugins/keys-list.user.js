@@ -184,8 +184,8 @@ function wrapper(plugin_info) {
       self.eachKey({"guid": key, "count": count});
     });
 
-    var html = '<p>KeysList for ' + window.PLAYER.nickname + ' ' + self.listAll.length + 'portals of keys. ' + new Date().toISOString() +
-        '</p><div class="keyslistcsv">name,count,latlng,intelmap,image,guid' + "\n" + self.listAll.join("\n") + '</div>';
+    var html = '<p>KeysList for ' + window.PLAYER.nickname + ' ' + self.listAll.length + 'portals in keys. ' + new Date().toISOString() +
+        '</p><div class="keyslistcsv"><pre>name,count,latlng,intelmap,image,guid' + "\n" + self.listAll.join("\n") + '</pre></div>';
     dialog({
       title: 'KeysList',
       html: html,
@@ -201,7 +201,7 @@ function wrapper(plugin_info) {
       .prop("type", "text/css")
       .html(".keyslistcsv {width: 580px; height: 380px; overflow-y: scroll; overflow-x: hidden;}")
       .appendTo("head");
-  }
+  };
 
   var setup = function() {
     // console.log("==KeysList setup ");
