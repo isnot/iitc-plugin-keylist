@@ -51,7 +51,7 @@ function wrapper(plugin_info) {
     if (Object.keys(lc).length) {
       $.each(lc, function(guid, data) {
         if (data.ent) console.log(data.ent);
-        if ((typeof data.ent === 'Array') && (data.ent.length === 3)) {
+        if ((typeof data.ent === 'object') && (data.ent.length === 3)) {
           data.ent = data.ent[2];
         }
       });
@@ -83,7 +83,8 @@ function wrapper(plugin_info) {
     $.each(inbound, function (guid, data) {
       console.log('==KeysList merge ' + Object.keys(data.ent).join(' '));
       if (data.ent && !cache.cache.hasOwnProperty(guid)) {
-        cache.cache[guid] = data.ent;
+        cache.cache[guid] = data;
+        console.log(data);
       }
     });
     return Object.keys(cache.cache).length;
