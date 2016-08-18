@@ -40,8 +40,8 @@ function wrapper(plugin_info) {
 
   cache.getPortalByGuid = function (guid) {
     var portal_cache = cache.cache[guid];
-    console.log('==KeysList gpbg ' + portal_cache + typeof portal_cache);
-    if (typeof portal_cache === 'object') {
+    console.log('==KeysList gpbg ' + portal_cache + cache.cache.length);
+    if (typeof portal_cache !== 'undefined') {
       return JSON.parse(portal_cache.ent);
     }
   };
@@ -55,7 +55,7 @@ function wrapper(plugin_info) {
     // if an existing portal cache, load it
     var raw = window.localStorage[cache.KEY_LOCALSTRAGE];
     console.log('plugin-cache-local: loadFromLocal ' + typeof raw);
-    if (typeof raw === 'object') {
+    if (typeof raw !== 'undefined') {
       cache.merge(JSON.parse(raw));
       console.log('plugin-cache-local: loadFromLocal ' + cache.cache.length);
     } else {
@@ -72,7 +72,9 @@ function wrapper(plugin_info) {
     }
 
     for (var x in Object.keys(inbound)) {
-      cache.cache[x] = inbound[x];
+      if (!cache.cache.hasOwnProperty(x)) {
+        cache.cache[x] = inbound[x];
+      }
     }
     return cache.cache.length;
   };
@@ -102,7 +104,7 @@ function wrapper(plugin_info) {
       console.log('==KsysList pd ' + data.title);
       if (data.title) name = data.title;
       imageUrl = window.fixPortalImageUrl(data.image);
-      if (imageUrl.indexOf('//') === 1) {
+      if (imageUrl.indexOf('//') === 0) {
         imageUrl = 'http:' + imageUrl;
       }
       if (imageUrl.indexOf(DEFAULT_PORTAL_IMG) !== -1) {
@@ -172,8 +174,8 @@ function wrapper(plugin_info) {
   var setup = function() {
     // console.log("==KeysList setup ");
     $('#toolbox').append('<a onclick="window.plugin.keysList.renderList();">KeysListCsv</a>');
-    addHook('iitcLoaded',        window.plugin.cachePortalDetailsOnMap.loadFromLocal());
-    addHook('mapDataRefreshEnd', window.plugin.cachePortalDetailsOnMap.storeToLocal());
+    addHook('iitcLoaded',        window.plugin.cachePortalDetailsOnMap.loadFromLocal);
+    addHook('mapDataRefreshEnd', window.plugin.cachePortalDetailsOnMap.storeToLocal);
   };
 
 
