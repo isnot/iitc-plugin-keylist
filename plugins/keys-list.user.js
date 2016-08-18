@@ -77,19 +77,18 @@ function wrapper(plugin_info) {
     var portal_cache = cache.getPortalByGuid(key.guid);
     if (typeof portal_cache === 'function') {
       //name = portal_cache.name;
-      console.log('==KsysList pc ' + portal_cache.name + portal_cache);
+      console.log('==KsysList pc ' + portal_cache + Object.keys(portal_cache).join(' '));
     }
 
     var portal = window.portals[key.guid];
     if (portal) {
       name = portal.options.data.title;
-      console.log('==KeysList po ' + portal);
+      console.log('==KeysList po ' + Object.keys(portal).join(' '));
     }
 
     var hLatLng = window.findPortalLatLng(key.guid);
     if (hLatLng) {
-      console.log('==KeysList ll ' + Object.keys(hLatLng).join(' '));
-      //  latLng = '"' + hLatLng.lat + ',' + hLatLng.lng + '"';
+      latLng = '"' + hLatLng.lat + ',' + hLatLng.lng + '"';
     }
 
     key.name = name;
@@ -103,11 +102,10 @@ function wrapper(plugin_info) {
   self.eachKey = function(key) {
     if (key.count > 0) {
       key = self.getPortalDetails(key);
-      var keyNameCsvValue = key.name;//.replaqce("/\"/g", '""');
-      keyNameCsvValue = '"' + keyNameCsvValue + '"';
+      var keyNameCsvValue = new String(key.name);
+      keyNameCsvValue = '"' + keyNameCsvValue.replaqce("/\"/g", '""') + '"';
       var csvline = [keyNameCsvValue, key.count, key.latLng, key.intelMapUrl, key.imageUrl, key.guid];
       self.listAll.push(csvline.join(","));
-      console.log("==KeysList key " + Object.keys(key).join(' '));
     }
   };
 
@@ -118,7 +116,6 @@ function wrapper(plugin_info) {
       self.eachKey({"guid": key, "count": count});
     });
 
-
     var html = '<p>KeysList for ' + window.PLAYER.nickname + ' ' + self.listAll.length + 'portals of keys. ' + new Date().toISOString() +
         '</p><textarea cols="78" rows="20">name,count,latlng,url,image,guid' + "\n" + self.listAll.join("\n") + '</textarea>';
     dialog({
@@ -127,12 +124,12 @@ function wrapper(plugin_info) {
       width: 600,
       position: {my: 'right center', at: 'center-60 center', of: window, collision: 'fit'}
     });
-    console.log("==KeysList " + window.PLAYER.nickname + " " + self.listAll.length + "keys " + new Date().toISOString());
+    console.log("==KeysList " + window.PLAYER.nickname + " " + self.listAll.length + " " + new Date().toISOString());
   };
 
 
   var setup = function() {
-    // console.log("==KeysList pkk " + Object.keys(plugin.keys.keys).join(" "));
+    // console.log("==KeysList setup ");
     $('#toolbox').append('<a onclick="window.plugin.keysList.renderList();">KeysListCsv</a>');
   };
 
