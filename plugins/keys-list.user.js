@@ -95,9 +95,15 @@ function wrapper(plugin_info) {
 
     var data = (window.portals[key.guid] && window.portals[key.guid].options.data) || window.portalDetail.get(key.guid) || null;
     if (data) {
-      name     = data.title;
+      console.log('==KsysList pd ' + data.title);
+      if (data.title) name = data.title;
       imageUrl = window.fixPortalImageUrl(data.image);
-      console.log('==KsysList pd ' + data + Object.keys(data).join(' '));
+      if (imageUrl.indexOf('//') === 1) {
+        imageUrl = 'http:' + imageUrl;
+      }
+      if (imageUrl.indexOf(DEFAULT_PORTAL_IMG) !== -1) {
+        imageUrl = '';
+      }
     }
 
     var hLatLng = window.findPortalLatLng(key.guid);
