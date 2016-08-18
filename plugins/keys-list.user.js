@@ -102,8 +102,8 @@ function wrapper(plugin_info) {
   self.eachKey = function(key) {
     if (key.count > 0) {
       key = self.getPortalDetails(key);
-      var keyNameCsvValue = new String(key.name);
-      keyNameCsvValue = '"' + keyNameCsvValue.replaqce("/\"/g", '""') + '"';
+      var keyNameCsvValue = key.name;
+      keyNameCsvValue = '"' + keyNameCsvValue.replace("/\"/g", '""') + '"';
       var csvline = [keyNameCsvValue, key.count, key.latLng, key.intelMapUrl, key.imageUrl, key.guid];
       self.listAll.push(csvline.join(","));
     }
