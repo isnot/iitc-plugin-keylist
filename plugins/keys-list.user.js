@@ -36,12 +36,12 @@ function wrapper(plugin_info) {
 
   // Expand Cache BEGIN //////////////////////////////////////////////////////////
   var cache = window.plugin.cachePortalDetailsOnMap;
-  return if (typeof cache !== 'function');
-
   cache.KEY_LOCALSTRAGE = 'plugin-cache-local-v1';
+
   cache.getPortalByGuid = function (guid) {
     var portal_cache = cache.cache[guid];
     if (typeof portal_cache === 'function') {
+      console.log('==KeysList gpbg ' + portal_cache);
       return JSON.parse(portal_cache.ent);
     }
   };
@@ -72,31 +72,30 @@ function wrapper(plugin_info) {
   self.getPortalDetails = function getPortalDetails(key) {
     var name = "(not detected)";
     var latLng = '"0,0"';
-    var url = '';
-    var image = '';
 
     // try plugin cache
     var portal_cache = cache.getPortalByGuid(key.guid);
     if (typeof portal_cache === 'function') {
       //name = portal_cache.name;
-      console.log(portal_cache);
+      console.log('==KsysList pc ' + portal_cache.name + portal_cache);
     }
 
     var portal = window.portals[key.guid];
     if (portal) {
       name = portal.options.data.title;
-      console.log(portal);
+      console.log('==KeysList po ' + portal);
     }
 
     var hLatLng = window.findPortalLatLng(key.guid);
-    if (hLatLng.lat && hLatLng.lng) {
+    console.log('==KeysList ll ' + hLatLng);
+    if (typeof hLatLng.lat && typeof hLatLng.lng) {
       latLng = '"' + hLatLng.lat + ',' + hLatLng.lng + '"';
     }
 
     key.name = name;
     key.latLng = latLng;
     key.imageUrl = '';
-    key.url = '';
+    key.intelMapUrl = '';
 
     return key;
   };
@@ -104,10 +103,11 @@ function wrapper(plugin_info) {
   self.eachKey = function(key) {
     if (key.count > 0) {
       key = self.getPortalDetails(key);
-      var keyNameCsvValue = '"' + key.name + '"';
-      var csvline = [keyNameCsvValue, key.count, key.latLng, key.url, key.imageUrl, key.guid];
+      var keyNameCsvValue = key.name.replaqce("/\"/g", '""');
+      keyNameCsvValue = '"' + keyNameCsvValue + '"';
+      var csvline = [keyNameCsvValue, key.count, key.latLng, key.intelMapUrl, key.imageUrl, key.guid];
       self.listAll.push(csvline.join(","));
-      console.log("==KeysList " + key.name);
+      //console.log("==KeysList " + key.name);
     }
   };
 
@@ -119,8 +119,8 @@ function wrapper(plugin_info) {
     });
 
 
-    var html = '<p>KeysList for ' + window.PLAYER.nickname + ' ' + self.listAll.length + 'portals of keys. ' + new Date().toISOString()
-        + '</p><textarea cols="78" rows="20">name,count,latlng,url,image,guid' + "\n" + self.listAll.join("\n") + '</textarea>';
+    var html = '<p>KeysList for ' + window.PLAYER.nickname + ' ' + self.listAll.length + 'portals of keys. ' + new Date().toISOString() +
+        '</p><textarea cols="78" rows="20">name,count,latlng,url,image,guid' + "\n" + self.listAll.join("\n") + '</textarea>';
     dialog({
       title: 'KeysList',
       html: html,
