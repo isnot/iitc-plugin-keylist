@@ -68,7 +68,7 @@ function wrapper(plugin_info) {
     }
 
     for (var x in Object.keys(inbound)) {
-      cache.cache{x} = inbound{x};
+      cache.cache[x] = inbound[x];
     }
     return cache.cache.length;
   };
@@ -93,10 +93,11 @@ function wrapper(plugin_info) {
       console.log('==KsysList pc ' + portal_cache + Object.keys(portal_cache).join(' '));
     }
 
-    var portal = window.portals[key.guid];
-    if (portal) {
-      name     = portal.options.data.title;
-      imageUrl = portal.options.data.imageUrl;
+    var data = (window.portals[key.guid] && window.portals[key.guid].options.data) || window.portalDetail.get(key.guid) || null;
+    if (data) {
+      name     = data.title;
+      imageUrl = window.fixPortalImageUrl(data.image);
+      console.log('==KsysList pd ' + data + Object.keys(data).join(' '));
     }
 
     var hLatLng = window.findPortalLatLng(key.guid);
