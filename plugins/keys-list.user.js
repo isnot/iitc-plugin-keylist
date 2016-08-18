@@ -40,8 +40,9 @@ function wrapper(plugin_info) {
 
   cache.getPortalByGuid = function (guid) {
     var portal_cache = cache.cache[guid];
+    console.log('==KeysList gpbg ' + portal_cache + typeof portal_cache);
     if (typeof portal_cache === 'function') {
-      console.log('==KeysList gpbg ' + portal_cache);
+
       return JSON.parse(portal_cache.ent);
     }
   };
@@ -109,7 +110,6 @@ function wrapper(plugin_info) {
     var hLatLng = window.findPortalLatLng(key.guid);
     if (hLatLng) {
       latLng = hLatLng.lat + ',' + hLatLng.lng;
-
     }
 
     key.name = name;
