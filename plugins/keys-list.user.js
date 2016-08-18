@@ -2,12 +2,12 @@
 // @id             iitc-plugin-keys-list@isnot
 // @name           IITC plugin: Keys List
 // @category       Keys
-// @version        0.2.20160817
+// @version        0.3.20160818
 // @namespace      https://github.com/jonatkins/ingress-intel-total-conversion
 // @author         isnot
 // @updateURL      none
 // @downloadURL    none
-// @description    [20160817] Show the manually entered key counts from the 'keys' plugin.
+// @description    [iitc-plugins] Export the manually entered key counts from the 'keys' plugin.
 // @include        https://www.ingress.com/intel*
 // @include        http://www.ingress.com/intel*
 // @match          https://www.ingress.com/intel*
@@ -26,42 +26,77 @@ function wrapper(plugin_info) {
 
   // PLUGIN START ////////////////////////////////////////////////////////
 
-  // if the Keys plugin is not available, quit now
+  // if the Keys/Cache plugin is not available, quit now
   if (!window.plugin.keys) {
     return console.warn("[KeysList] This plugin is dependent on the Keys plugin being present.");
   }
+  if (!window.plugin.cachePortalDetailsOnMap) {
+    return console.warn("[KeysList] This plugin is dependent on the Cache plugin being present.");
+  }
+
+  // Expand Cache BEGIN //////////////////////////////////////////////////////////
+  var cache = window.plugin.cachePortalDetailsOnMap;
+  return if (typeof cache !== 'function');
+
+  cache.KEY_LOCALSTRAGE = 'plugin-cache-local-v1';
+  cache.getPortalByGuid = function (guid) {
+    var portal_cache = cache.cache[guid];
+    if (typeof portal_cache === 'function') {
+      return JSON.parse(portal_cache.ent);
+    }
+  };
+
+  cache.storeToLocal = function () {
+    localStorage.setItem(cache.KEY_LOCALSTRAGE, JSON.stringify(cache.cache));
+  };
+
+  cache.loadFromLocal = function () {
+    // if an existing portal cache, load it
+    var raw = window.localStorage[cache.KEY_LOCALSTRAGE];
+    if (typeof raw === 'function') {
+      //cache.cache = JSON.parse(window.localStorage[cache.KEY_LOCALSTRAGE]);
+    } else {
+      // make a new cache
+      window.localStorage[cache.KEY_LOCALSTRAGE] = "{}";
+    }
+  };
+
+  // Expand Cache END //////////////////////////////////////////////////////////
 
   // use own namespace for plugin
   window.plugin.keysList = function() {};
   var self = window.plugin.keysList;
   self.listAll = [];
-  self.cache   = {};
-  self.localStrageKey = "plugin-KeysList-cache";
 
   // fetch a portal name from a cached list if available
   self.getPortalDetails = function getPortalDetails(key) {
     var name = "(not detected)";
     var latLng = '"0,0"';
-    var portal = window.portals[key.guid];
+    var url = '';
+    var image = '';
 
     // try plugin cache
-    if (self.cache[key.guid]) {
-      name = self.cache[key.guid];
+    var portal_cache = cache.getPortalByGuid(key.guid);
+    if (typeof portal_cache === 'function') {
+      //name = portal_cache.name;
+      console.log(portal_cache);
     }
 
+    var portal = window.portals[key.guid];
     if (portal) {
       name = portal.options.data.title;
-      // cache for later
-      self.cache[key.guid] = name;
+      console.log(portal);
+    }
 
-      var hLatLng = portal.getLatLng();
-      if (hLatLng.lat && hLatLng.lng) {
-        latLng = '"' + hLatLng.lat + ',' + hLatLng.lng + '"';
-      }
+    var hLatLng = window.findPortalLatLng(key.guid);
+    if (hLatLng.lat && hLatLng.lng) {
+      latLng = '"' + hLatLng.lat + ',' + hLatLng.lng + '"';
     }
 
     key.name = name;
     key.latLng = latLng;
+    key.imageUrl = '';
+    key.url = '';
 
     return key;
   };
@@ -70,42 +105,37 @@ function wrapper(plugin_info) {
     if (key.count > 0) {
       key = self.getPortalDetails(key);
       var keyNameCsvValue = '"' + key.name + '"';
-      var csvline = [keyNameCsvValue, key.count, key.latLng, key.guid];
+      var csvline = [keyNameCsvValue, key.count, key.latLng, key.url, key.imageUrl, key.guid];
       self.listAll.push(csvline.join(","));
-      // console.log("==KeysList " + key.name);
+      console.log("==KeysList " + key.name);
     }
   };
 
   self.renderList = function() {
     self.listAll = [];
 
-    // if an existing portal cache, load it
-    if (window.localStorage[self.localStrageKey]) {
-      self.cache = JSON.parse(window.localStorage[self.localStrageKey]);
-      // make a new cache
-    } else {
-      window.localStorage[self.localStrageKey] = "{}";
-    }
-
     $.each(plugin.keys.keys, function(key, count) {
       self.eachKey({"guid": key, "count": count});
     });
 
-    localStorage.setItem(self.localStrageKey, JSON.stringify(self.cache));
-    var html = '<textarea cols="78" rows="20">KeysList,' + window.PLAYER.nickname + "," + new Date().toISOString() + "," + self.listAll.length + "\nname,count,latlng,guid\n" + self.listAll.join("\n") + "</textarea>";
+
+    var html = '<p>KeysList for ' + window.PLAYER.nickname + ' ' + self.listAll.length + 'portals of keys. ' + new Date().toISOString()
+        + '</p><textarea cols="78" rows="20">name,count,latlng,url,image,guid' + "\n" + self.listAll.join("\n") + '</textarea>';
     dialog({
       title: 'KeysList',
       html: html,
       width: 600,
       position: {my: 'right center', at: 'center-60 center', of: window, collision: 'fit'}
     });
-    // alert("KeysList," + window.PLAYER.nickname + "," + new Date().toISOString() + "," + self.listAll.length + "\nname,count,latlng,guid\n" + self.listAll.join("\n"));
+    console.log("==KeysList " + window.PLAYER.nickname + " " + self.listAll.length + "keys " + new Date().toISOString());
   };
+
 
   var setup = function() {
     // console.log("==KeysList pkk " + Object.keys(plugin.keys.keys).join(" "));
     $('#toolbox').append('<a onclick="window.plugin.keysList.renderList();">KeysListCsv</a>');
   };
+
 
   // PLUGIN END //////////////////////////////////////////////////////////
 
