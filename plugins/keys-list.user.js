@@ -87,9 +87,9 @@ function wrapper(plugin_info) {
     }
 
     var hLatLng = window.findPortalLatLng(key.guid);
-    console.log('==KeysList ll ' + hLatLng);
-    if (typeof hLatLng.lat && typeof hLatLng.lng) {
-      latLng = '"' + hLatLng.lat + ',' + hLatLng.lng + '"';
+    if (hLatLng) {
+      console.log('==KeysList ll ' + Object.keys(hLatLng).join(' '));
+      //  latLng = '"' + hLatLng.lat + ',' + hLatLng.lng + '"';
     }
 
     key.name = name;
@@ -103,11 +103,11 @@ function wrapper(plugin_info) {
   self.eachKey = function(key) {
     if (key.count > 0) {
       key = self.getPortalDetails(key);
-      var keyNameCsvValue = key.name.replaqce("/\"/g", '""');
+      var keyNameCsvValue = key.name;//.replaqce("/\"/g", '""');
       keyNameCsvValue = '"' + keyNameCsvValue + '"';
       var csvline = [keyNameCsvValue, key.count, key.latLng, key.intelMapUrl, key.imageUrl, key.guid];
       self.listAll.push(csvline.join(","));
-      //console.log("==KeysList " + key.name);
+      console.log("==KeysList key " + Object.keys(key).join(' '));
     }
   };
 
