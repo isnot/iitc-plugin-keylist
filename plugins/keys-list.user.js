@@ -40,7 +40,7 @@ function wrapper(plugin_info) {
 
   cache.getPortalByGuid = function (guid) {
     var portal_cache = cache.cache[guid];
-    if (!portal_cache) return;
+    if (!portal_cache || !typeof portal_cache.ent) return;
 
     var ent = portal_cache.ent;
     // what is this?
@@ -48,8 +48,8 @@ function wrapper(plugin_info) {
       ent = ent[2];
     }
 
-    if (ent) {
-      // console.log('==KeysList gpbg ' + Object.keys(ent).join(' '));
+    // ent should be Array and have 18 elements.
+    if (Array.isArray(ent) {
       return window.decodeArray.portalSummary(ent);
     }
   };
@@ -58,7 +58,7 @@ function wrapper(plugin_info) {
     var lc = cache.cache;
     if (Object.keys(lc).length) {
       $.each(lc, function(guid, data) {
-        // if (data.ent) console.log(data.ent);
+        // if (data.ent) console.log(data.ent); for DEBUG
         var d = {};
         // I dont know what I do...
         if (data.ent && Array.isArray(data.ent) && (data.ent.length === 3)) {
@@ -91,13 +91,11 @@ function wrapper(plugin_info) {
 
   cache.merge = function (inbound) {
     $.each(inbound, function (guid, data) {
-      console.log('plugin-cache-loacl: merge ' + data);
-      if (data[ent] && !cache.cache[guid]) {
+      console.log('plugin-cache-loacl: merge ' + data.ent.toString);// for DEBUG
+      if (data.ent && !cache.cache[guid]) {
         cache.cache[guid] = data;
-        // console.log(data);
       }
     });
-    return Object.keys(cache.cache).length;
   };
 
   // Expand Cache END //////////////////////////////////////////////////////////
@@ -118,7 +116,7 @@ function wrapper(plugin_info) {
     // try plugin cache
     var portal_cache = cache.getPortalByGuid(key.guid);
     if (portal_cache) {
-      title = portal_cache.title;
+      if (portal_cache.title) title = portal_cache.title;
       imageUrl = window.fixPortalImageUrl(portal_cache.image);
       console.log('==KsysList from cache ' + portal_cache.title);
     }
@@ -138,7 +136,7 @@ function wrapper(plugin_info) {
     }
 
     var hLatLng = window.findPortalLatLng(key.guid);
-    if (hLatLng) {
+    if (hLatLng && (latLng === '0,0')) {
       latLng = hLatLng.lat + ',' + hLatLng.lng;
     }
 
@@ -179,40 +177,40 @@ function wrapper(plugin_info) {
 
   self.renderList = function() {
     self.listAll = [];
+    // cache.loadFromLocal();// for DEBUG
 
     $.each(plugin.keys.keys, function(key, count) {
       self.eachKey({"guid": key, "count": count});
     });
 
     var html = '<p>KeysList for ' + window.PLAYER.nickname + ' ' + self.listAll.length + ' portals in keys. ' + new Date().toISOString() +
-        ' <button type="button" id="selectCSV" onclick="window.plugin.keysList.selectCSV();">SelectAll</button></p>' +
-        '<pre class="keyslistcsv">name,count,latlng,intelmap,image,guid' + "\n" + self.listAll.join("\n") + '</pre>';
+        ' <button type="button" class="selectCSV" onclick="window.plugin.keysList.selectCSV();">SelectAll</button></p>' +
+        '<pre class="keysListCSV">name,count,latlng,intelmap,image,guid' + "\n" + self.listAll.join("\n") + '</pre>';
     dialog({
       title: 'KeysList',
       html: html,
       width: 600,
       position: {my: 'right center', at: 'center-60 center', of: window, collision: 'fit'}
     });
-    // console.log("==KeysList " + window.PLAYER.nickname + " " + self.listAll.length + " " + new Date().toISOString());
-    // cache.storeToLocal();// for debug
+    // console.log("==KeysList " + self.listAll.length);// for DEBUG
+    // cache.storeToLocal();// for DEBUG
   };
 
   self.setupCSS = function() {
     $("<style>")
       .prop("type", "text/css")
-      .html(".keyslistcsv {width: 580px; height: 380px; overflow-y: scroll; overflow-x: hidden;}")
+      .html(".keysListCSV {width: 580px; height: 380px; overflow-y: scroll; overflow-x: hidden; background: white;}")
       .appendTo("head");
   };
 
   self.selectCSV = function() {
-    $(".keyslistcsv:first").css('color','red');
-    //$(".keyslistcsv:first").focus(function(){$(this).select();});
+    $(".keysListCSV:first").css('color','red');
+    //$(".keysListCSV:first").focus(function(){$(this).select();});
   };
 
   var setup = function() {
-    // console.log("==KeysList setup ");
     self.setupCSS();
-    $('#toolbox').append('<a onclick="window.plugin.keysList.renderList();">KeysListCsv</a>');
+    $('#toolbox').append('<a onclick="window.plugin.keysList.renderList();">KeysListCSV</a>');
     addHook('iitcLoaded',        window.plugin.cachePortalDetailsOnMap.loadFromLocal);
     addHook('mapDataRefreshEnd', window.plugin.cachePortalDetailsOnMap.storeToLocal);
   };
