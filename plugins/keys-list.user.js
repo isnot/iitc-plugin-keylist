@@ -49,7 +49,7 @@ function wrapper(plugin_info) {
     }
 
     // ent should be Array and have 18 elements.
-    if (Array.isArray(ent) {
+    if (Array.isArray(ent)) {
       return window.decodeArray.portalSummary(ent);
     }
   };
