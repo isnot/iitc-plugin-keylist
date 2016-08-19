@@ -185,8 +185,8 @@ function wrapper(plugin_info) {
     });
 
     var html = '<p>KeysList for ' + window.PLAYER.nickname + ' ' + self.listAll.length + ' portals in keys. ' + new Date().toISOString() +
-        '</p><div class="keyslistcsv"><pre>name,count,latlng,intelmap,image,guid' + "\n" + self.listAll.join("\n") + '</pre>' +
-        '<p><a onclick="window.plugin.keysList.selectCSV();">SelectAll</a></p></div>';
+        ' <button type="button" id="selectCSV" onclick="window.plugin.keysList.selectCSV();">SelectAll</button></p>' +
+        '<pre class="keyslistcsv">name,count,latlng,intelmap,image,guid' + "\n" + self.listAll.join("\n") + '</pre>';
     dialog({
       title: 'KeysList',
       html: html,
@@ -205,17 +205,8 @@ function wrapper(plugin_info) {
   };
 
   self.selectCSV = function() {
-    $(".keyslistcsv").first().focus(function() {
-      var $this = $(this);
-      $this.select();
-
-      // Work around Chrome's little problem
-      $this.mouseup(function() {
-        // Prevent further mouseup intervention
-        $this.unbind("mouseup");
-        return false;
-      });
-    });
+    $(".keyslistcsv:first").css('color','red');
+    //$(".keyslistcsv:first").focus(function(){$(this).select();});
   };
 
   var setup = function() {
