@@ -118,6 +118,7 @@ function wrapper(plugin_info) {
     if (portal_cache) {
       if (portal_cache.title) title = portal_cache.title;
       imageUrl = window.fixPortalImageUrl(portal_cache.image);
+      latLng = portal_cache.latE6/1E6 + ',' + portal_cache.lngE6/1E6;
       console.log('==KsysList from cache ' + portal_cache.title);
     }
 
