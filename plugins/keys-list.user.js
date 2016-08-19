@@ -91,7 +91,7 @@ function wrapper(plugin_info) {
 
   cache.merge = function (inbound) {
     $.each(inbound, function (guid, data) {
-      console.log('plugin-cache-loacl: merge ' + data.ent.toString);// for DEBUG
+      console.log('plugin-cache-loacl: merge ' + data.ent.toString());// for DEBUG
       if (data.ent && !cache.cache[guid]) {
         cache.cache[guid] = data;
       }
