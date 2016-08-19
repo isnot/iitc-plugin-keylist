@@ -200,7 +200,7 @@ function wrapper(plugin_info) {
   self.setupCSS = function() {
     $("<style>")
       .prop("type", "text/css")
-      .html(".keysListCSV {width: 580px; height: 380px; overflow-y: scroll; overflow-x: hidden; background: white;}")
+      .html(".keysListCSV {width: 580px; height: 380px; overflow-y: scroll; overflow-x: hidden; background: white; color: black;}")
       .appendTo("head");
   };
 
