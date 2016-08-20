@@ -2,7 +2,7 @@
 // @id             iitc-plugin-keys-list@isnot
 // @name           IITC plugin: Keys List
 // @category       Keys
-// @version        0.4.20160819
+// @version        0.5.20160820
 // @namespace      https://github.com/jonatkins/ingress-intel-total-conversion
 // @author         isnot
 // @updateURL      none
@@ -107,26 +107,60 @@ function wrapper(plugin_info) {
   self.DEFAULT_ZOOM_LEVEL = '17';
   self.listAll = [];
 
+    // fetch a portal info from Bookmarks if available
+  self.getPortalInfoFromBookmarks = function getPortalInfoFromBookmarks(guid) {
+    if (!window.plugin.bookmarks || !guid) return;
+    var bkmrkinfo = window.plugin.bookmarks.findByGuid(guid);
+    if (!bkmrkinfo) return;
+
+    var folders = window.plugin.bookmarks.bkmrksObj.portals;
+    if (folders.hasOwnProperty(bkmrkinfo.id_folder)) {
+      var folder = folders[bkmrkinfo.id_folder];
+      if (folder.bkmrk.hasOwnProperty(bkmrkinfo.id_bookmark)) {
+        return $.extend(folder.bkmrk[bkmrkinfo.id_bookmark], {bkmrkfolder: folder.label});
+      }
+    }
+
+    var others = window.plugin.bookmarks.bkmrksObj.portals.idOthers.bkmrk;
+    if (others.hasOwnProperty(bkmrkinfo.id_bookmark)) {
+      return $.extend(others[bkmrkinfo.id_bookmark], {bkmrkfolder: 'other'});
+    }
+  };
+
   // fetch a portal info from a cached list if available
   self.getPortalDetails = function getPortalDetails(key) {
-    var title = "(not detected)";
-    var latLng = '0,0';
+    var title = '';
+    var latLng = '';
     var imageUrl = '';
+    var annotation = '';
+
+    // try plugin bookmark
+    var portal_bkmrk = self.getPortalInfoFromBookmarks(key.guid);
+    if (portal_bkmrk) {
+      if (portal_bkmrk.label !== 'undefined') title = portal_bkmrk.label;
+      latLng = portal_bkmrk.latlng;
+      annotation = portal_bkmrk.bkmrkfolder;
+      console.log('==KsysList from bookmark ' + portal_bkmrk.label);
+    }
 
     // try plugin cache
     var portal_cache = cache.getPortalByGuid(key.guid);
     if (portal_cache) {
-      if (portal_cache.title) title = portal_cache.title;
+      if (portal_cache.title && !title) title = portal_cache.title;
       imageUrl = window.fixPortalImageUrl(portal_cache.image);
-      latLng = portal_cache.latE6/1E6 + ',' + portal_cache.lngE6/1E6;
+      if (!latLng) latLng = portal_cache.latE6/1E6 + ',' + portal_cache.lngE6/1E6;
       console.log('==KsysList from cache ' + portal_cache.title);
     }
 
     var data = (window.portals[key.guid] && window.portals[key.guid].options.data) || window.portalDetail.get(key.guid) || null;
     if (data) {
+      if (data.title && data.title !== 'undefined' && !title) title = data.title;
+      if (!imageUrl) imageUrl = window.fixPortalImageUrl(data.image);
       console.log('==KsysList from view ' + data.title);
-      if (data.title) title = data.title;
-      imageUrl = window.fixPortalImageUrl(data.image);
+    }
+    var hLatLng = window.findPortalLatLng(key.guid);
+    if (hLatLng && !latLng) {
+      latLng = hLatLng.lat + ',' + hLatLng.lng;
     }
 
     if (imageUrl.indexOf('//') === 0) {
@@ -136,19 +170,24 @@ function wrapper(plugin_info) {
       imageUrl = '';
     }
 
-    var hLatLng = window.findPortalLatLng(key.guid);
-    if (hLatLng && (latLng === '0,0')) {
-      latLng = hLatLng.lat + ',' + hLatLng.lng;
+    if (latLng) {
+      key.intelMapUrl = self.INTEL_URL + '?ll=' + latLng + '&z=' + self.DEFAULT_ZOOM_LEVEL + '&pll=' + latLng;
+    } else {
+      key.intelMapUrl = '';
+    }
+
+    // fail over
+    if (!title) {
+      title = '(not detected)';
+    }
+    if (!latLng) {
+      latLng = '0,0';
     }
 
     key.title = title;
     key.latLng = latLng;
     key.imageUrl = imageUrl;
-    if (latLng === '0,0') {
-      key.intelMapUrl = '';
-    } else {
-      key.intelMapUrl = self.INTEL_URL + '?ll=' + latLng + '&z=' + self.DEFAULT_ZOOM_LEVEL + '&pll=' + latLng;
-    }
+    key.annotation = annotation;
 
     return key;
   };
@@ -170,6 +209,7 @@ function wrapper(plugin_info) {
         self.csvValue(key.latLng),
         self.csvValue(key.intelMapUrl),
         self.csvValue(key.imageUrl),
+        self.csvValue(key.annotation),
         key.guid
       ];
       self.listAll.push(csvline.join(","));
@@ -186,7 +226,7 @@ function wrapper(plugin_info) {
 
     var html = '<p>KeysList for ' + window.PLAYER.nickname + ' ' + self.listAll.length + ' portals in keys. ' + new Date().toISOString() +
         ' <button type="button" class="selectCSV" onclick="window.plugin.keysList.selectCSV();">SelectAll</button></p>' +
-        '<pre class="keysListCSV">name,count,latlng,intelmap,image,guid' + "\n" + self.listAll.join("\n") + '</pre>';
+        '<pre class="keysListCSV">name,count,latlng,intelmap,image,memo,guid' + "\n" + self.listAll.join("\n") + '</pre>';
     dialog({
       title: 'KeysList',
       html: html,
