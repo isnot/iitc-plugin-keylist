@@ -240,7 +240,7 @@ function wrapper(plugin_info) {
   self.setupCSS = function() {
     $("<style>")
       .prop("type", "text/css")
-      .html(".keysListCSV {width: 580px; height: 380px; overflow-y: scroll; overflow-x: hidden; background: white; color: black;}")
+      .html(".keysListCSV {width: 580px; height: 380px; overflow-y: scroll; overflow-x: hidden; background: white; color: black;} .keysExportSetbox > a { display:block; color:#ffce00; border:1px solid #ffce00; padding:3px 0; margin:10px auto; width:80%; text-align:center; background:rgba(8,48,78,.9); } ")
       .appendTo("head");
   };
 
@@ -251,7 +251,7 @@ function wrapper(plugin_info) {
 
   var setup = function() {
     self.setupCSS();
-    $('#toolbox').append('<a onclick="window.plugin.keysList.renderList();">KeysListCSV</a>');
+    $('#toolbox').append('<a onclick="window.plugin.keysList.renderList();" title="keys list export">KeysListCSV</a>');
     addHook('iitcLoaded',        window.plugin.cachePortalDetailsOnMap.loadFromLocal);
     addHook('mapDataRefreshEnd', window.plugin.cachePortalDetailsOnMap.storeToLocal);
   };
