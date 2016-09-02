@@ -282,7 +282,7 @@ function wrapper(plugin_info) {
 
   var setup = function() {
     self.setupCSS();
-    $('#toolbox').append('<a onclick="window.plugin.keysList.renderList();">KeysList</a>');
+    $('#toolbox').append('<a onclick="window.plugin.keysList.renderList();" title="Export Keys List">KeysList</a>');
     if (iitcVersionNumber => '20151111074206') {
       addHook('iitcLoaded',        window.plugin.cachePortalDetailsOnMap.loadFromLocal);
       addHook('mapDataRefreshEnd', window.plugin.cachePortalDetailsOnMap.storeToLocal);
