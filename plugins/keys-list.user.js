@@ -28,11 +28,11 @@ function wrapper(plugin_info) {
 
   // Expand Cache BEGIN //////////////////////////////////////////////////////////
 
-  var iitcVersionNumber = Number(window.iitcBuildDate.replace('/\D/g', ''));
+  var iitcVersionNumber = Number(window.iitcBuildDate.replace(/\D/g, ''));
   if (iitcVersionNumber => '20151111074206') {
     // if the Cache plugin is not available, quit now
     if (!window.plugin.cachePortalDetailsOnMap) {
-      return console.warn("[KeysList] This plugin is dependent on the Cache plugin being present.");
+      return console.warn('[KeysList] This plugin is dependent on the Cache plugin being present.');
     }
 
     var cache = window.plugin.cachePortalDetailsOnMap;
@@ -84,7 +84,7 @@ function wrapper(plugin_info) {
         console.log('plugin-cache-local: loadFromLocal ' + Object.keys(cache.cache).length);
       } else {
         // make a new cache
-        window.localStorage[cache.KEY_LOCALSTRAGE] = "{}";
+        window.localStorage[cache.KEY_LOCALSTRAGE] = '{}';
         console.log('plugin-cache-local: init');
       }
     };
@@ -199,7 +199,7 @@ function wrapper(plugin_info) {
 
   self._csvValue = function(str) {
     if (str) {
-      return '"' + str.replace("/\"/g", '""') + '"';
+      return '"' + str.replace(/\"/g, '""') + '"';
     } else {
       return '';
     }
@@ -217,7 +217,7 @@ function wrapper(plugin_info) {
         self._csvValue(key.annotation),
         key.guid
       ];
-      self.listAll.push(csvline.join(","));
+      self.listAll.push(csvline.join(','));
     }
   };
 
@@ -227,18 +227,17 @@ function wrapper(plugin_info) {
 
     // if the Keys plugin is not available, quit now
     if (!window.plugin.keys) {
-      return console.warn("[KeysList] This plugin is dependent on the Keys plugin.");
+      return console.warn('[KeysList] This plugin is dependent on the Keys plugin.');
     }
 
     $.each(plugin.keys.keys, function(key, count) {
-      self.eachKey({"guid": key, "count": count});
+      self.eachKey({'guid': key, 'count': count});
     });
 
     var content = self.CSV_HEADER + "\n" + self.listAll.join("\n");
-    var blob = new Blob([content], {"type": "text/csv"});
+    var blob = new Blob([content], {'type': 'text/csv'});
     var filename = self.createCsvFilename();
     var url = window.URL || window.webkitURL;
-
 
     var html = $('<div>');
     var p = $('<p>').text('KeysList for ' + window.PLAYER.nickname + ' ' + self.listAll.length + ' portals in keys. ');
@@ -247,13 +246,14 @@ function wrapper(plugin_info) {
     a.appendTo(p);
     p.appendTo(html);
     pre.appendTo(html);
+
     dialog({
       title: 'KeysList',
       html: html.html(),
       width: 550,
       position: {my: 'right center', at: 'center-60 center', of: window, collision: 'fit'}
     });
-    // console.log("==KeysList " + self.listAll.length);// for DEBUG
+    // console.log('==KeysList ' + self.listAll.length);// for DEBUG
     // cache.storeToLocal();// for DEBUG
   };
 
@@ -274,10 +274,10 @@ function wrapper(plugin_info) {
   };
 
   self.setupCSS = function() {
-    $("<style>")
-      .prop("type", "text/css")
-      .html(".keysListCSV {width: 500px; height: 300px; overflow-y: scroll; overflow-x: hidden; background: white; color: black;}")
-      .appendTo("head");
+    $('<style>')
+      .prop('type', 'text/css')
+      .html('.keysListCSV {width: 500px; height: 300px; overflow-y: scroll; overflow-x: hidden; background: white; color: black;}')
+      .appendTo('head');
   };
 
   var setup = function() {
