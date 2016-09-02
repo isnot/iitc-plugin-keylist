@@ -2,7 +2,7 @@
 // @id             iitc-plugin-keys-list@isnot
 // @name           IITC plugin: Keys List
 // @category       Keys
-// @version        0.5.20160820
+// @version        0.6.20160903
 // @namespace      https://github.com/jonatkins/ingress-intel-total-conversion
 // @author         isnot
 // @updateURL      none
@@ -26,15 +26,13 @@ function wrapper(plugin_info) {
 
   // PLUGIN START ////////////////////////////////////////////////////////
 
-  // if the Keys/Cache plugin is not available, quit now
-  if (!window.plugin.keys) {
-    return console.warn("[KeysList] This plugin is dependent on the Keys plugin being present.");
-  }
+  // Expand Cache BEGIN //////////////////////////////////////////////////////////
+
+  // if the Cache plugin is not available, quit now
   if (!window.plugin.cachePortalDetailsOnMap) {
     return console.warn("[KeysList] This plugin is dependent on the Cache plugin being present.");
   }
 
-  // Expand Cache BEGIN //////////////////////////////////////////////////////////
   var cache = window.plugin.cachePortalDetailsOnMap;
   cache.KEY_LOCALSTRAGE = 'plugin-cache-local-v1';
 
@@ -107,7 +105,7 @@ function wrapper(plugin_info) {
   self.DEFAULT_ZOOM_LEVEL = '17';
   self.listAll = [];
 
-    // fetch a portal info from Bookmarks if available
+  // fetch a portal info from Bookmarks if available
   self.getPortalInfoFromBookmarks = function getPortalInfoFromBookmarks(guid) {
     if (!window.plugin.bookmarks || !guid) return;
     var bkmrkinfo = window.plugin.bookmarks.findByGuid(guid);
@@ -220,6 +218,11 @@ function wrapper(plugin_info) {
     self.listAll = [];
     // cache.loadFromLocal();// for DEBUG
 
+    // if the Keys plugin is not available, quit now
+    if (!window.plugin.keys) {
+      return console.warn("[KeysList] This plugin is dependent on the Keys plugin.");
+    }
+
     $.each(plugin.keys.keys, function(key, count) {
       self.eachKey({"guid": key, "count": count});
     });
@@ -245,7 +248,7 @@ function wrapper(plugin_info) {
   };
 
   self.selectCSV = function() {
-    $(".keysListCSV:first").css('color','red');
+    $(".keysListCSV:first").css('color', 'red');
     //$(".keysListCSV:first").focus(function(){$(this).select();});
   };
 
