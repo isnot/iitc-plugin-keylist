@@ -234,14 +234,15 @@ function wrapper(plugin_info) {
       self.eachKey({'guid': key, 'count': count});
     });
 
+    var filename = self.createCsvFilename();
     var content = self.CSV_HEADER + "\n" + self.listAll.join("\n");
     var blob = new Blob([content], {'type': 'text/csv'});
-    var filename = self.createCsvFilename();
     var url = window.URL || window.webkitURL;
+    var html_blob = url.createObjectURL(blob);
 
     var html = $('<div>');
     var p = $('<p>').text('KeysList for ' + window.PLAYER.nickname + ' ' + self.listAll.length + ' portals in keys. ');
-    var a = $('<a>').attr({'download': filename, 'href': url.createObjectURL(blob)}).text('Export CSV');
+    var a = $('<a>').attr({'download': filename, 'href': html_blob}).text('Export CSV');
     var pre = $('<pre>').addClass('keysListCSV').text(content);
     a.appendTo(p);
     p.appendTo(html);
