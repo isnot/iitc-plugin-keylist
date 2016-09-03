@@ -26,82 +26,6 @@ function wrapper(plugin_info) {
 
   // PLUGIN START ////////////////////////////////////////////////////////
 
-  // Expand Cache BEGIN //////////////////////////////////////////////////////////
-
-  var iitcVersionNumber = Number(window.iitcBuildDate.replace(/\D/g, ''));
-  if (iitcVersionNumber => 20151111074206) {
-    // if the Cache plugin is not available, quit now
-    if (!window.plugin.cachePortalDetailsOnMap) {
-      return console.warn('[KeysList] This plugin is dependent on the Cache plugin being present.');
-    }
-
-    var cache = window.plugin.cachePortalDetailsOnMap;
-    cache.KEY_LOCALSTRAGE = 'plugin-cache-local-v1';
-
-    cache.getPortalByGuid = function (guid) {
-      var portal_cache = cache.cache[guid];
-      if (!portal_cache || !typeof portal_cache.ent) return;
-
-      var ent = portal_cache.ent;
-      // what is this?
-      if (Array.isArray(ent) && (ent.length === 3)) {
-        ent = ent[2];
-      }
-
-      // ent should be Array and have 18 elements.
-      if (Array.isArray(ent)) {
-        return window.decodeArray.portalSummary(ent);
-      }
-    };
-
-    cache.storeToLocal = function () {
-      var lc = cache.cache;
-      if (Object.keys(lc).length) {
-        $.each(lc, function(guid, data) {
-          // if (data.ent) console.log(data.ent);// for DEBUG
-          var d = {};
-          // I dont know what I do...
-          if (data.ent && Array.isArray(data.ent) && (data.ent.length === 3)) {
-            d.loadtime = data.ent[1];
-            d.ent = data.ent[2];
-          } else {
-            d.loadtime = data.loadtime;
-            d.ent = data.ent;
-          }
-          lc[guid] = d;
-        });
-        localStorage.setItem(cache.KEY_LOCALSTRAGE, JSON.stringify(lc));
-      }
-
-      console.log('plugin-cache-local: storeToLocal ' + Object.keys(lc).length);
-    };
-
-    cache.loadFromLocal = function () {
-      // if an existing portal cache, load it
-      var raw = window.localStorage[cache.KEY_LOCALSTRAGE];
-      if (raw) {
-        cache.merge(JSON.parse(raw));
-        console.log('plugin-cache-local: loadFromLocal ' + Object.keys(cache.cache).length);
-      } else {
-        // make a new cache
-        window.localStorage[cache.KEY_LOCALSTRAGE] = '{}';
-        console.log('plugin-cache-local: init');
-      }
-    };
-
-    cache.merge = function (inbound) {
-      $.each(inbound, function (guid, data) {
-        console.log('plugin-cache-loacl: merge ' + data.ent.toString());// for DEBUG
-        if (data.ent && !cache.cache[guid]) {
-          cache.cache[guid] = data;
-        }
-      });
-    };
-
-  } // if window.iitcBuildDate
-
-  // Expand Cache END //////////////////////////////////////////////////////////
-
   // use own namespace for plugin
   window.plugin.keysList = function() {};
   var self = window.plugin.keysList;
@@ -130,7 +54,7 @@ function wrapper(plugin_info) {
     }
   };
 
-  // fetch a portal info from a cached list if available
+  // fetch a portal info
   self.getPortalDetails = function getPortalDetails(key) {
     var title = '';
     var latLng = '';
@@ -147,7 +71,7 @@ function wrapper(plugin_info) {
     }
 
     // try plugin cache if available
-    if (window.plugin.cachePortalDetailsOnMap && window.plugin.cachePortalDetailsOnMap.hasOwnProperty('getPortalByGuid')) {
+    if (window.plugin.cachePortalDetailsOnMap && window.plugin.cacheLocal && window.plugin.cacheLocal.cache_local_is_loaded) {
       var portal_cache = window.plugin.cachePortalDetailsOnMap.getPortalByGuid(key.guid);
       if (portal_cache) {
         if (portal_cache.title && !title) title = portal_cache.title;
@@ -163,6 +87,7 @@ function wrapper(plugin_info) {
       if (!imageUrl) imageUrl = window.fixPortalImageUrl(data.image);
       // console.log('==KsysList from view ' + data.title);// for DEBUG
     }
+
     var hLatLng = window.findPortalLatLng(key.guid);
     if (hLatLng && !latLng) {
       latLng = hLatLng.lat + ',' + hLatLng.lng;
@@ -284,15 +209,9 @@ function wrapper(plugin_info) {
   var setup = function() {
     self.setupCSS();
     $('#toolbox').append('<a onclick="window.plugin.keysList.renderList();" title="Export Keys List">KeysList</a>');
-    if (iitcVersionNumber => 20151111074206) {
-      addHook('iitcLoaded',        window.plugin.cachePortalDetailsOnMap.loadFromLocal);
-      addHook('mapDataRefreshEnd', window.plugin.cachePortalDetailsOnMap.storeToLocal);
-    }
   };
 
-
   // PLUGIN END //////////////////////////////////////////////////////////
-
 
   setup.info = plugin_info; //add the script info data to the function as a property
   if(!window.bootPlugins) window.bootPlugins = [];
