@@ -2,7 +2,7 @@
 // @id             iitc-plugin-keys-list@isnot
 // @name           IITC plugin: Keys List
 // @category       Keys
-// @version        0.6.20160903
+// @version        0.7.20160903
 // @namespace      https://github.com/jonatkins/ingress-intel-total-conversion
 // @author         isnot
 // @updateURL      https://github.com/isnot/iitc-plugin-keys-list/raw/master/plugins/keys-list.user.js
@@ -29,7 +29,7 @@ function wrapper(plugin_info) {
   // Expand Cache BEGIN //////////////////////////////////////////////////////////
 
   var iitcVersionNumber = Number(window.iitcBuildDate.replace(/\D/g, ''));
-  if (iitcVersionNumber => '20151111074206') {
+  if (iitcVersionNumber => 20151111074206) {
     // if the Cache plugin is not available, quit now
     if (!window.plugin.cachePortalDetailsOnMap) {
       return console.warn('[KeysList] This plugin is dependent on the Cache plugin being present.');
@@ -250,7 +250,7 @@ function wrapper(plugin_info) {
     dialog({
       title: 'KeysList',
       html: html.html(),
-      width: 550,
+      width: 480,
       position: {my: 'right center', at: 'center-60 center', of: window, collision: 'fit'}
     });
     // console.log('==KeysList ' + self.listAll.length);// for DEBUG
@@ -276,14 +276,14 @@ function wrapper(plugin_info) {
   self.setupCSS = function() {
     $('<style>')
       .prop('type', 'text/css')
-      .html('.keysListCSV {width: 500px; height: 300px; overflow-y: scroll; overflow-x: hidden; background: white; color: black;}')
+      .html('.keysListCSV {width: 450px; height: 260px; overflow-y: scroll; overflow-x: hidden; background: white; color: black;}')
       .appendTo('head');
   };
 
   var setup = function() {
     self.setupCSS();
     $('#toolbox').append('<a onclick="window.plugin.keysList.renderList();" title="Export Keys List">KeysList</a>');
-    if (iitcVersionNumber => '20151111074206') {
+    if (iitcVersionNumber => 20151111074206) {
       addHook('iitcLoaded',        window.plugin.cachePortalDetailsOnMap.loadFromLocal);
       addHook('mapDataRefreshEnd', window.plugin.cachePortalDetailsOnMap.storeToLocal);
     }
