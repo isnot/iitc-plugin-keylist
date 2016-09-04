@@ -170,7 +170,7 @@ function wrapper(plugin_info) {
       a.click(function(){
         var file_reader = new FileReader();
         file_reader.onload = function(e){
-          $('<a>').attr({'target': '_blank', 'download': filename, '': '', 'href': file_reader.result}).appendTo(document.body).click().remove();
+          $('<a>').attr({'target': '_blank', 'download': filename, 'href': file_reader.result}).appendTo($('body')).click().remove();
           //anchor.parentNode.removeChild(anchor);
         };
         file_reader.readAsDataURL(blob);
