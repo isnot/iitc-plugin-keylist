@@ -174,7 +174,7 @@ function wrapper(plugin_info) {
           //anchor.parentNode.removeChild(anchor);
         };
         file_reader.readAsDataURL(blob);
-      };);
+      });
     } else {
       a.attr({'download': filename, 'href': blob_url});
     }
