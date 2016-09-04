@@ -2,7 +2,7 @@
 // @id             iitc-plugin-keys-list@isnot
 // @name           IITC plugin: Keys List
 // @category       Keys
-// @version        0.7.20160903
+// @version        0.8.20160903
 // @namespace      https://github.com/jonatkins/ingress-intel-total-conversion
 // @author         isnot
 // @updateURL      https://github.com/isnot/iitc-plugin-keys-list/raw/master/plugins/keys-list.user.js
@@ -163,11 +163,24 @@ function wrapper(plugin_info) {
     var content = self.CSV_HEADER + "\n" + self.listAll.join("\n");
     var blob = new Blob([content], {'type': 'text/csv'});
     var url = window.URL || window.webkitURL;
-    var html_blob = url.createObjectURL(blob);
+    var blob_url = url.createObjectURL(blob);
+    var a = $('<a>').text('Export CSV');
+
+    if (window.isTouchDevice()) {
+      a.click(function(){
+        var file_reader = new FileReader();
+        file_reader.onload = function(e){
+          $('<a>').attr({'target': '_blank', 'download': filename, '': '', 'href': file_reader.result}).appendTo(document.body).click().remove();
+          //anchor.parentNode.removeChild(anchor);
+        };
+        file_reader.readAsDataURL(blob);
+      };);
+    } else {
+      a.attr({'download': filename, 'href': blob_url});
+    }
 
     var html = $('<div>');
     var p = $('<p>').text('KeysList for ' + window.PLAYER.nickname + ' ' + self.listAll.length + ' portals in keys. ');
-    var a = $('<a>').attr({'download': filename, 'href': html_blob}).text('Export CSV');
     var pre = $('<pre>').addClass('keysListCSV').text(content);
     a.appendTo(p);
     p.appendTo(html);
@@ -183,19 +196,10 @@ function wrapper(plugin_info) {
     // cache.storeToLocal();// for DEBUG
   };
 
-  self._num2str = function(num) {
-    var nums = num.toString();
-    if (nums.length === 2) {
-      return '' + nums;
-    } else {
-      return '0' + nums;
-    }
-  };
-
   self.createCsvFilename = function() {
     var now = new Date();
-    var dt = now.getFullYear() + self._num2str(now.getMonth() + 1) + self._num2str(now.getDate()) +
-        self._num2str(now.getHours()) + self._num2str(now.getMinutes()) + self._num2str(now.getSeconds());
+    var dt = now.getFullYear() + window.zeroPad(now.getMonth() + 1, 2) + window.zeroPad(now.getDate(), 2) +
+        window.zeroPad(now.getHours(), 2) + window.zeroPad(now.getMinutes(), 2) + window.zeroPad(now.getSeconds(), 2);
     return 'KeysList_' + window.PLAYER.nickname + '_' + dt + '.csv';
   };
 
