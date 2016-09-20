@@ -31,7 +31,7 @@ https://github.com/isnot/iitc-plugin-keys-list/raw/master/plugins/keys-list.user
 * ブックマークは、フォルダで分けて分類すると、わかりやすくなります
  + 地域別、カプセルの色別、等。お好きなように！
 
-以上を管理したい対象のキー全てに行う（手入力です！）。
+以上を管理したい対象のキー全てに行う。手入力です！
 
 ### KeysList でCSV出力
 
