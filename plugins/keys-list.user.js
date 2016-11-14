@@ -2,7 +2,7 @@
 // @id             iitc-plugin-keys-list@isnot
 // @name           IITC plugin: Keys List
 // @category       Keys
-// @version        0.9.20161113
+// @version        0.9.20161114
 // @namespace      https://github.com/jonatkins/ingress-intel-total-conversion
 // @author         isnot
 // @updateURL      https://github.com/isnot/iitc-plugin-keys-list/raw/master/plugins/keys-list.user.js
@@ -30,7 +30,9 @@ function wrapper(plugin_info) {
   window.plugin.keysList = function() {};
   var self = window.plugin.keysList;
   self.INTEL_URL = 'https://www.ingress.com/intel';
+  self.GMAP_URL = 'https://maps.google.com/maps';
   self.DEFAULT_ZOOM_LEVEL = '17';
+  self.IGNORE_UNKNOWN_KEYS = true;
   self.CSV_HEADER = 'Guid,Lat,Lng,ImageUrl,Title,Address,Quantity,IntelUrl,GoogleMapUrl,CapsuleID,CapsuleType';
   self.listAll = [];
 
@@ -105,8 +107,10 @@ function wrapper(plugin_info) {
 
     if (lat && lng) {
       key.intelMapUrl = self.INTEL_URL + '?ll=' + lat + ',' + lng + '&z=' + self.DEFAULT_ZOOM_LEVEL + '&pll=' + lat + ',' + lng;
+      key.GoogleMapUrl = self.GMAP_URL + '?q=loc:' + lat + ',' + lng + '&z=' + self.DEFAULT_ZOOM_LEVEL;
     } else {
       key.intelMapUrl = '';
+      key.GoogleMapUrl = '';
       if (!lat) lat = '0';
       if (!lng) lng = '0';
     }
@@ -139,18 +143,20 @@ function wrapper(plugin_info) {
       key = self.getPortalDetails(key);
       var csvline = [
         key.guid,
-        self._csvValue(key.lat),
-        self._csvValue(key.lng),
+        key.lat,
+        key.lng,
         self._csvValue(key.imageUrl),
         self._csvValue(key.title),
-        '', // Address
+        self._csvValue(key.annotation), // Address
         parseInt(key.count, 10),
         self._csvValue(key.intelMapUrl),
-        '', // GoogleMapUrl
+        self._csvValue(key.GoogleMapUrl),
         self._csvValue(key.annotation), // CapsuleID
         'N' // CapsuleType
       ];
-      self.listAll.push(csvline.join(','));
+      if (self.IGNORE_UNKNOWN_KEYS && key.latLng !== '0,0') {
+        self.listAll.push(csvline.join(','));
+      }
     }
   };
 
