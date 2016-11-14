@@ -147,7 +147,7 @@ function wrapper(plugin_info) {
         key.lng,
         self._csvValue(key.imageUrl),
         self._csvValue(key.title),
-        self._csvValue(key.annotation), // Address
+        '', // Address
         parseInt(key.count, 10),
         self._csvValue(key.intelMapUrl),
         self._csvValue(key.GoogleMapUrl),
